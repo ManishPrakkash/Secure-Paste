@@ -19,8 +19,8 @@ export default {
         'text-muted': '#737373',
 
         // Accent colors
-        'accent-primary': '#22C55E',
-        'accent-secondary': '#3B82F6',
+        'accent-primary': '#3B82F6',
+        'accent-secondary': '#22C55E',
         'accent-warning': '#F59E0B',
         'accent-danger': '#EF4444',
 
