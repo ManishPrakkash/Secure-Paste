@@ -1,0 +1,14 @@
+{
+  "appName": {
+    "message": "Secure Paste",
+    "description": "拡張機能の名前"
+  },
+  "appShortDescription": {
+    "message": "AIチャットボットへの貼り付け時にAPIキー、トークン、シークレットを自動検出してマスク",
+    "description": "Chrome Web Store短い説明（最大132文字）"
+  },
+  "appDescription": {
+    "message": "Secure Pasteは、開発者がChatGPT、Claude、GeminiなどのAIプラットフォームに誤って認証情報を漏洩することを防ぎます。\n\n🛡️ 主な機能\n\n• 自動シークレット検出：AWSキー、APIトークン、秘密鍵、パスワードなど39種類以上のシークレットを即座に検出\n• リアルタイムマスキング：機密データがAIチャットボットに到達する前に変換\n• 100%ローカル処理：クラウド処理なし - データがブラウザ外に出ることはありません\n• 開発者向け：ソフトウェアエンジニアとDevOpsチーム専用に設計\n\n🔑 保護対象\n\n• クラウドプロバイダーキー：AWS、Google Cloud、Azure認証情報\n• APIトークン：GitHub、GitLab、NPM、OpenAI、Stripe、Slack、Discord\n• 秘密鍵：RSA、EC、SSH、PGP鍵と証明書\n• パスワード：環境変数、CLI認証、データベースパスワード\n• データベース接続：PostgreSQL、MySQL、MongoDB URL\n• ネットワーク情報：IPアドレス、URL、APIエンドポイント\n\n⚡ 動作方法\n\n1. 拡張機能をインストール\n2. サポートされているAIプラットフォームにアクセス（ChatGPT、Claude、Gemini、Perplexity、Grok）\n3. シークレットを含むコードやテキストを貼り付け\n4. AIに到達する前にシークレットが自動的にマスクされます\n5. 何が保護されたかをリアルタイム通知で確認\n\n🎯 サポートプラットフォーム\n\n• ChatGPT (chatgpt.com)\n• Claude AI (claude.ai)\n• Google Gemini (gemini.google.com)\n• Perplexity AI (perplexity.ai)\n• Grok (grok.com)\n\n🔒 プライバシーとセキュリティ\n\n• 100%ローカル処理：すべての検出がブラウザ内で行われます\n• テレメトリーなし：分析なし、トラッキングなし\n• データ収集なし：クリップボードの内容を見たり、保存したり、送信したりすることは一切ありません\n• オープンソースコア：検出エンジンの透明性\n• 最小限の権限：設定保存のためのストレージ権限のみ必要\n\n📊 開発者体験\n\n• 軽量：100KB未満の拡張機能サイズ\n• 高速：10KBテキストに対して1ms未満の検出時間\n• 非侵襲的：バックグラウンドで静かに動作\n• カスタマイズ可能：パターンカテゴリの有効化/無効化\n• 統計：保護したシークレットの数を追跡\n\n💡 使用例\n\n• 本番環境の認証情報を公開せずにAIにコードレビューを依頼\n• APIキーを安全に保ちながらデバッグのヘルプを受ける\n• シークレットを漏洩せずに設定例を共有\n• インフラストラクチャコードについてAIと安全に協力\n\n開発者が開発者のために作りました。二度とAIに認証情報を漏らさないでください。",
+    "description": "Chrome Web Store完全な説明"
+  }
+}
