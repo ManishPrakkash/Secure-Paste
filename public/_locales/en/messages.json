@@ -1,0 +1,14 @@
+{
+  "appName": {
+    "message": "Secure Paste",
+    "description": "The name of the extension"
+  },
+  "appShortDescription": {
+    "message": "Automatically detect and mask API keys, tokens, and secrets when pasting to AI chatbots",
+    "description": "Short description for Chrome Web Store (max 132 characters)"
+  },
+  "appDescription": {
+    "message": "Secure Paste protects developers from accidentally leaking credentials to AI platforms like ChatGPT, Claude, and Gemini.\n\n🛡️ KEY FEATURES\n\n• Automatic Secret Detection: Instantly detects 39+ types of secrets including AWS keys, API tokens, private keys, and passwords\n• Real-time Masking: Transforms sensitive data before it reaches AI chatbots\n• Zero Cloud Processing: 100% local detection - no data ever leaves your browser\n• Developer-Focused: Designed specifically for software engineers and DevOps teams\n\n🔑 WHAT IT PROTECTS\n\n• Cloud Provider Keys: AWS, Google Cloud, Azure credentials\n• API Tokens: GitHub, GitLab, NPM, OpenAI, Stripe, Slack, Discord\n• Private Keys: RSA, EC, SSH, PGP keys and certificates\n• Passwords: Environment variables, CLI authentication, database passwords\n• Database Connections: PostgreSQL, MySQL, MongoDB URLs\n• Network Information: IP addresses, URLs, API endpoints\n\n⚡ HOW IT WORKS\n\n1. Install the extension\n2. Visit any supported AI platform (ChatGPT, Claude, Gemini, Perplexity, Grok)\n3. Paste code or text containing secrets\n4. Secrets are automatically masked before reaching the AI\n5. See real-time notifications showing what was protected\n\n🎯 SUPPORTED PLATFORMS\n\n• ChatGPT (chatgpt.com)\n• Claude AI (claude.ai)\n• Google Gemini (gemini.google.com)\n• Perplexity AI (perplexity.ai)\n• Grok (grok.com)\n\n🔒 PRIVACY & SECURITY\n\n• 100% Local Processing: All detection happens in your browser\n• No Telemetry: Zero analytics, zero tracking\n• No Data Collection: We never see, store, or transmit your clipboard content\n• Open Source Core: Detection engine transparency\n• Minimal Permissions: Only requires storage for settings\n\n📊 DEVELOPER EXPERIENCE\n\n• Lightweight: <100KB extension size\n• Fast: <1ms detection time for 10KB text\n• Non-Intrusive: Works silently in the background\n• Customizable: Enable/disable pattern categories\n• Statistics: Track how many secrets you've protected\n\n💡 USE CASES\n\n• Asking AI for code reviews without exposing production credentials\n• Getting help debugging while keeping API keys safe\n• Sharing configuration examples without leaking secrets\n• Collaborating with AI on infrastructure code securely\n\nBuilt by developers, for developers. Never leak credentials to AI again.",
+    "description": "Full description for Chrome Web Store"
+  }
+}
