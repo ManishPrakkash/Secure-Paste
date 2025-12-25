@@ -435,27 +435,33 @@ export function Settings() {
         </div>
 
         {/* Restoration Feature Toggle */}
-        <div className="mb-8 p-6 bg-bg-secondary rounded-lg border border-border-default">
-          <div className="flex items-start justify-between">
-            <div className="flex-1">
-              <div className="flex items-center gap-2 mb-1">
-                <h3 className="text-base font-semibold text-text-primary">
-                  Enable Restoration on Copy
-                </h3>
-              </div>
-              <p className="text-sm text-text-secondary mb-2">
-                Automatically restore masked values to originals when copying text from AI platforms
-              </p>
-              <div className="text-xs text-text-muted space-y-1">
-                <p>• When enabled, copying text like <code className="px-1 py-0.5 rounded bg-bg-tertiary text-accent-primary">[AWS_KEY#a3f7]</code> will restore the original secret</p>
-                <p>• Restore maps are stored in session storage only (cleared on tab close)</p>
-                <p>• Per-site isolation for security</p>
-                <p className="text-accent-warning">⚠️ Use carefully: This restores original secrets to clipboard</p>
+        <div className="mb-8 p-5 bg-bg-secondary rounded-lg border border-border-default">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 group relative">
+              <h3 className="text-sm font-medium text-text-primary">
+                Enable Restoration on Copy
+              </h3>
+              <div className="relative">
+                <svg
+                  className="w-4 h-4 text-text-muted hover:text-text-secondary cursor-help transition-colors"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <circle cx="12" cy="12" r="10" strokeWidth="2" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 16v-4m0-4h.01" />
+                </svg>
+                {/* Tooltip */}
+                <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-80 p-4 bg-bg-elevated rounded-lg border border-border-default shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none">
+                  <p className="text-xs text-text-secondary mb-3">
+                    Automatically restore masked values to originals when copying text from AI platforms
+                  </p>
+                </div>
               </div>
             </div>
             <button
               onClick={() => handleRestorationToggle(!settings.enableRestoration)}
-              className={`ml-4 relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${settings.enableRestoration ? 'bg-accent-primary' : 'bg-border-strong'
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${settings.enableRestoration ? 'bg-accent-primary' : 'bg-border-strong'
                 }`}
             >
               <span
@@ -488,7 +494,6 @@ export function Settings() {
                   label={category.label}
                   description={category.description}
                   enabled={settings.categories[category.name as keyof Categories]}
-                  patterns={category.patterns}
                   count={settings.categoryCounts?.[category.name as keyof CategoryCounts] || 0}
                   onChange={handleCategoryToggle}
                 />

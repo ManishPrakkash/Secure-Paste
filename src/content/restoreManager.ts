@@ -4,6 +4,7 @@
  */
 
 import type { RestoreMapEntry } from '@/core/detector';
+import { safeSessionStorageSet, safeSessionStorageGet, safeSendMessage } from './extensionContext';
 
 /**
  * Storage key format: restore_map_{hostname}
@@ -20,13 +21,12 @@ function getStorageKey(): string {
 export async function saveRestoreMap(restoreMap: RestoreMapEntry[]): Promise<void> {
   const key = getStorageKey();
 
-  try {
-    // Store in session storage (not synced, cleared on session end)
-    await chrome.storage.session.set({
-      [key]: restoreMap,
-    });
-  } catch (error) {
-    console.error('[Secure Paste] Failed to save restore map:', error);
+  const success = await safeSessionStorageSet(key, restoreMap);
+
+  if (!success) {
+    // Extension context invalidated - silently skip
+    // User will be notified on next paste attempt
+    return;
   }
 }
 
@@ -36,13 +36,8 @@ export async function saveRestoreMap(restoreMap: RestoreMapEntry[]): Promise<voi
 export async function getRestoreMap(): Promise<RestoreMapEntry[]> {
   const key = getStorageKey();
 
-  try {
-    const result = await chrome.storage.session.get(key);
-    return result[key] || [];
-  } catch (error) {
-    console.error('[Secure Paste] Failed to get restore map:', error);
-    return [];
-  }
+  const result = await safeSessionStorageGet(key);
+  return result || [];
 }
 
 /**
@@ -54,15 +49,15 @@ export async function clearRestoreMap(): Promise<void> {
   const key = getStorageKey();
 
   try {
-    // Check if chrome.storage.session is available
-    if (!chrome?.storage?.session) {
-      console.warn('[Secure Paste] chrome.storage.session not available, skipping clear');
-      return;
-    }
+    // Use safe wrapper that checks context validity
+    const result = await safeSessionStorageGet(key);
 
-    await chrome.storage.session.remove(key);
+    if (result !== null) {
+      // Context is valid, safe to remove
+      await chrome.storage.session.remove(key);
+    }
   } catch (error) {
-    console.error('[Secure Paste] Failed to clear restore map:', error);
+    // Silently fail - session storage will be cleared on tab close anyway
   }
 }
 
@@ -70,16 +65,17 @@ export async function clearRestoreMap(): Promise<void> {
  * Check if restoration is enabled in settings
  */
 export async function isRestorationEnabled(): Promise<boolean> {
-  try {
-    const response = await chrome.runtime.sendMessage({
-      type: 'GET_SETTINGS',
-    });
+  const response = await safeSendMessage({
+    type: 'GET_SETTINGS',
+  });
 
-    if (response.success && response.data) {
-      return response.data.enableRestoration === true;
-    }
-  } catch (error) {
-    console.error('[Secure Paste] Failed to check restoration setting:', error);
+  if (!response) {
+    // Extension context invalidated
+    return false;
+  }
+
+  if (response.success && response.data) {
+    return response.data.enableRestoration === true;
   }
 
   // Default: disabled for security

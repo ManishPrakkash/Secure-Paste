@@ -4,6 +4,7 @@
  */
 
 import { handlePaste } from './pasteHandler';
+import { safeSendMessage } from './extensionContext';
 
 // Track if interceptor is active
 let isActive = false;
@@ -45,9 +46,14 @@ export function cleanupClipboardInterceptor(): void {
  */
 export async function isExtensionEnabled(): Promise<boolean> {
   try {
-    const response = await chrome.runtime.sendMessage({
+    const response = await safeSendMessage({
       type: 'GET_SETTINGS',
     });
+
+    if (!response) {
+      // Extension context invalidated
+      return false;
+    }
 
     if (response.success) {
       return response.data.enabled !== false; // Default to true
@@ -64,10 +70,15 @@ export async function isExtensionEnabled(): Promise<boolean> {
  */
 export async function incrementProtectedCount(count: number = 1): Promise<void> {
   try {
-    await chrome.runtime.sendMessage({
+    const response = await safeSendMessage({
       type: 'INCREMENT_PROTECTED_COUNT',
       data: { count },
     });
+
+    if (!response) {
+      // Extension context invalidated - silently skip
+      return;
+    }
   } catch (error) {
     console.error('[Secure Paste] Error incrementing protected count:', error);
   }

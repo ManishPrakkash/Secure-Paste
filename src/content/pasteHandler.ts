@@ -8,6 +8,7 @@ import { incrementProtectedCount } from './clipboardInterceptor';
 import { showToast } from './toast';
 import { saveRestoreMap } from './restoreManager';
 import { updateRestorationCache } from './copyHandler';
+import { safeSendMessage } from './extensionContext';
 
 /**
  * Handle paste event and mask secrets
@@ -39,9 +40,21 @@ async function processPaste(originalText: string): Promise<void> {
   let enableRestoration = false;
 
   try {
-    const response = await chrome.runtime.sendMessage({
+    const response = await safeSendMessage({
       type: 'GET_SETTINGS',
     });
+
+    // Check if response is null (extension context invalidated)
+    if (!response) {
+      console.warn('[Secure Paste] Extension was reloaded. Please refresh this page to re-enable protection.');
+
+      // Show one-time notification to user
+      showContextInvalidatedNotice();
+
+      // Stop processing - extension needs page refresh
+      insertMaskedText(originalText);
+      return;
+    }
 
     if (response.success && response.data.categories) {
       enabledCategories = response.data.categories;
@@ -116,7 +129,7 @@ async function processPaste(originalText: string): Promise<void> {
 
   // Increment site-specific count
   try {
-    await chrome.runtime.sendMessage({
+    await safeSendMessage({
       type: 'INCREMENT_SITE_COUNT',
       data: { hostname, count: replacements },
     });
@@ -127,7 +140,7 @@ async function processPaste(originalText: string): Promise<void> {
   // Increment category-specific counts
   if (categoryCounts && Object.keys(categoryCounts).length > 0) {
     try {
-      await chrome.runtime.sendMessage({
+      await safeSendMessage({
         type: 'INCREMENT_CATEGORY_COUNTS',
         data: { categoryCounts },
       });
@@ -141,7 +154,7 @@ async function processPaste(originalText: string): Promise<void> {
     try {
       // Send each custom pattern count separately
       for (const [patternId, count] of Object.entries(customPatternCounts)) {
-        await chrome.runtime.sendMessage({
+        await safeSendMessage({
           type: 'INCREMENT_CUSTOM_PATTERN_COUNT',
           data: { patternId, count },
         });
@@ -361,4 +374,135 @@ function insertMaskedText(text: string): void {
 
   // Fallback: use execCommand (deprecated but widely supported)
   document.execCommand('insertText', false, text);
+}
+
+/**
+ * Show notification when extension context is invalidated
+ * This happens when the extension is reloaded/updated
+ */
+let contextInvalidatedNoticeShown = false;
+
+function showContextInvalidatedNotice(): void {
+  // Only show once per page load
+  if (contextInvalidatedNoticeShown) return;
+  contextInvalidatedNoticeShown = true;
+
+  // Create notification element
+  const notice = document.createElement('div');
+  notice.style.cssText = `
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 2147483647;
+    background: #1F1F1F;
+    border: 2px solid #F59E0B;
+    border-radius: 8px;
+    padding: 16px 24px;
+    max-width: 500px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    animation: slideDown 0.3s ease-out;
+  `;
+
+  notice.innerHTML = `
+    <div style="display: flex; align-items: start; gap: 12px;">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2" style="flex-shrink: 0; margin-top: 2px;">
+        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+        <line x1="12" y1="9" x2="12" y2="13"/>
+        <line x1="12" y1="17" x2="12.01" y2="17"/>
+      </svg>
+      <div style="flex: 1;">
+        <div style="color: #FAFAFA; font-size: 14px; font-weight: 600; margin-bottom: 4px;">
+          Secure Paste Extension Updated
+        </div>
+        <div style="color: #A3A3A3; font-size: 13px; margin-bottom: 12px;">
+          Please refresh this page to re-enable secret protection.
+        </div>
+        <button id="safepaste-refresh-btn" style="
+          background: #F59E0B;
+          color: #000;
+          border: none;
+          padding: 8px 16px;
+          border-radius: 6px;
+          font-size: 13px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: background 0.2s;
+        ">
+          Refresh Page
+        </button>
+      </div>
+      <button id="safepaste-close-notice" style="
+        background: none;
+        border: none;
+        color: #737373;
+        font-size: 20px;
+        cursor: pointer;
+        padding: 0;
+        width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+      ">×</button>
+    </div>
+  `;
+
+  // Add animation
+  if (!document.getElementById('safepaste-notice-styles')) {
+    const style = document.createElement('style');
+    style.id = 'safepaste-notice-styles';
+    style.textContent = `
+      @keyframes slideDown {
+        from {
+          transform: translateX(-50%) translateY(-100px);
+          opacity: 0;
+        }
+        to {
+          transform: translateX(-50%) translateY(0);
+          opacity: 1;
+        }
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  document.body.appendChild(notice);
+
+  // Add event listeners
+  const refreshBtn = document.getElementById('safepaste-refresh-btn');
+  const closeBtn = document.getElementById('safepaste-close-notice');
+
+  if (refreshBtn) {
+    refreshBtn.addEventListener('click', () => {
+      window.location.reload();
+    });
+    refreshBtn.addEventListener('mouseenter', () => {
+      refreshBtn.style.background = '#D97706';
+    });
+    refreshBtn.addEventListener('mouseleave', () => {
+      refreshBtn.style.background = '#F59E0B';
+    });
+  }
+
+  if (closeBtn) {
+    closeBtn.addEventListener('click', () => {
+      notice.remove();
+    });
+    closeBtn.addEventListener('mouseenter', () => {
+      closeBtn.style.color = '#FAFAFA';
+    });
+    closeBtn.addEventListener('mouseleave', () => {
+      closeBtn.style.color = '#737373';
+    });
+  }
+
+  // Auto-remove after 15 seconds
+  setTimeout(() => {
+    if (notice.parentElement) {
+      notice.remove();
+    }
+  }, 15000);
 }

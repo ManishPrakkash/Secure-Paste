@@ -6,49 +6,62 @@
 import { initClipboardInterceptor, isExtensionEnabled, cleanupClipboardInterceptor } from './clipboardInterceptor';
 import { cleanupToasts } from './toast';
 import { initCopyHandler } from './copyHandler';
+import { safeSendMessage } from './extensionContext';
 
 let isInitialized = false;
 
 // Initialize content script
 async function init() {
-  console.log('[Secure Paste] Content script loaded on:', window.location.hostname);
+  try {
+    console.log('[Secure Paste] Content script loaded on:', window.location.hostname);
 
-  // Check if extension is enabled
-  const enabled = await isExtensionEnabled();
+    // Check if extension is enabled
+    const enabled = await isExtensionEnabled();
 
-  if (!enabled) {
-    console.log('[Secure Paste] Extension is disabled');
-    if (isInitialized) {
-      cleanupClipboardInterceptor();
-      cleanupToasts();
-      isInitialized = false;
+    if (!enabled) {
+      console.log('[Secure Paste] Extension is disabled');
+      if (isInitialized) {
+        cleanupClipboardInterceptor();
+        cleanupToasts();
+        isInitialized = false;
+      }
+      return;
     }
-    return;
-  }
 
-  // Check if site is enabled
-  const hostname = window.location.hostname;
-  const response = await chrome.runtime.sendMessage({
-    type: 'IS_SITE_ENABLED',
-    data: { hostname },
-  });
+    // Check if site is enabled
+    const hostname = window.location.hostname;
+    const response = await safeSendMessage({
+      type: 'IS_SITE_ENABLED',
+      data: { hostname },
+    });
 
-  if (!response.success || !response.data.enabled) {
-    console.log('[Secure Paste] Site is disabled');
-    if (isInitialized) {
-      cleanupClipboardInterceptor();
-      cleanupToasts();
-      isInitialized = false;
+    if (!response || !response.success || !response.data.enabled) {
+      console.log('[Secure Paste] Site is disabled or extension context invalid');
+      if (isInitialized) {
+        cleanupClipboardInterceptor();
+        cleanupToasts();
+        isInitialized = false;
+      }
+      return;
     }
-    return;
-  }
 
-  // Initialize clipboard interceptor if not already initialized
-  if (!isInitialized) {
-    initClipboardInterceptor();
-    initCopyHandler();
-    isInitialized = true;
-    console.log('[Secure Paste] Ready to protect secrets!');
+    // Initialize clipboard interceptor if not already initialized
+    if (!isInitialized) {
+      initClipboardInterceptor();
+      initCopyHandler();
+      isInitialized = true;
+      console.log('[Secure Paste] Ready to protect secrets!');
+    }
+  } catch (error) {
+    // Check if extension context was invalidated
+    if (error instanceof Error && error.message.includes('Extension context invalidated')) {
+      console.warn('[Secure Paste] Extension context invalidated. Page refresh required.');
+      // Silently fail - user will be notified on next paste attempt
+      return;
+    }
+
+    // Re-throw other errors
+    throw error;
   }
 }
 
