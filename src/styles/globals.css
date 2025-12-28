@@ -22,7 +22,7 @@ body {
 /* Popup specific styles */
 body:not(.settings-page) {
   width: 320px;
-  min-height: 520px;
+  min-height: 460px;
   overflow: hidden;
 }
 
