@@ -27,9 +27,37 @@ const ICON_SVGS = {
 };
 
 /**
- * Create Shadow DOM styles
+ * Get site-specific right offset for icon positioning
+ * Different sites have different layouts requiring different positioning
+ */
+function getSiteRightOffset(): number {
+  const hostname = window.location.hostname;
+
+  // ChatGPT - buttons are on the right, need to position icon to the left of them
+  if (hostname.includes('chatgpt.com') || hostname.includes('chat.openai.com')) {
+    return 90;
+  }
+
+  // Gemini - icon can be closer to the right edge
+  if (hostname.includes('gemini.google.com') || hostname.includes('bard.google.com')) {
+    return 12;
+  }
+
+  // Claude - icon can be closer to the right edge
+  if (hostname.includes('claude.ai')) {
+    return 12;
+  }
+
+  // Default for other sites
+  return 50;
+}
+
+/**
+ * Create Shadow DOM styles with site-specific positioning
  */
 function getIconStyles(): string {
+  const rightOffset = getSiteRightOffset();
+
   return `
     :host {
       all: initial;
@@ -46,9 +74,8 @@ function getIconStyles(): string {
     .icon-button {
       all: unset;
       position: absolute;
-      right: 88px;
-      top: 50%;
-      transform: translateY(-50%);
+      right: ${rightOffset}px;
+      top: 14px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -66,11 +93,11 @@ function getIconStyles(): string {
     .icon-button:hover {
       background: rgba(255, 255, 255, 1);
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-      transform: translateY(-50%) scale(1.05);
+      transform: scale(1.05);
     }
     
     .icon-button:active {
-      transform: translateY(-50%) scale(0.95);
+      transform: scale(0.95);
     }
     
     .icon-button.idle {
