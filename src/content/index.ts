@@ -7,6 +7,7 @@ import { initClipboardInterceptor, isExtensionEnabled, cleanupClipboardIntercept
 import { cleanupToasts } from './toast';
 import { initCopyHandler } from './copyHandler';
 import { safeSendMessage } from './extensionContext';
+import { initInlineUI, cleanupInlineUI } from './inline-ui';
 
 let isInitialized = false;
 
@@ -23,6 +24,7 @@ async function init() {
       if (isInitialized) {
         cleanupClipboardInterceptor();
         cleanupToasts();
+        cleanupInlineUI();
         isInitialized = false;
       }
       return;
@@ -40,6 +42,7 @@ async function init() {
       if (isInitialized) {
         cleanupClipboardInterceptor();
         cleanupToasts();
+        cleanupInlineUI();
         isInitialized = false;
       }
       return;
@@ -49,6 +52,7 @@ async function init() {
     if (!isInitialized) {
       initClipboardInterceptor();
       initCopyHandler();
+      initInlineUI(); // Initialize inline UI feature
       isInitialized = true;
       console.log('[Secure Paste] Ready to protect secrets!');
     }
