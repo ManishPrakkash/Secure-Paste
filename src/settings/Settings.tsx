@@ -180,7 +180,7 @@ const CATEGORY_INFO: CategoryInfo[] = [
   },
   {
     name: 'passwords',
-    label: 'Passwords & Authentication',
+    label: 'Authentication',
     description: 'Password fields, environment variables, CLI authentication',
     patterns: [
       {
